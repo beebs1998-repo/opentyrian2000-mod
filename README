@@ -24,43 +24,8 @@ Setup - Gameplay - Bullet Curves (ON/OFF), ON by default. The setting is stored
 as `bullet_curves` under `[gameplay]` in `opentyrian.cfg`.
 
 ON is stock Tyrian. OFF makes enemy bullets fly dead straight from wherever they
-were fired, the way a CAVE or Touhou shot does. This is a large difficulty and
-look change, not a cosmetic one -- see the caveats below before turning it off.
-
-Two separate authored mechanisms are gated, and they are wildly uneven in how
-many weapons use them. Measured over the 819 base weapons in `tyrian.hdt`:
-
-| mechanism | weapons | share |
-|---|---:|---:|
-| `tx`/`ty` - bending toward you | 6 | 0.7% |
-| `acceleration`/`accelerationx` - speeding up | 218 | 26.6% |
-| `aim` - aimed at you when fired | 51 | 6.2% |
-
-**The bending is what 6 weapons out of 819 do.** Most of those six are not fast
-homing shots at all -- four are near-stationary orbs with no initial velocity
-that creep toward you one pixel per tick. If you turned the row off and saw no
-difference, that is the expected result, not a broken option.
-
-**The speeding up is what 218 weapons do**, and that is what you will actually
-see change. Acceleration is only ever -1, 0 or +1 per tick, which sounds trivial
-but compounds: a shot launched at 3 px/tick is past 8 within a few ticks.
-
-Three caveats:
-
-- **It is not a straight difficulty reduction.** 174 weapons accelerate and get
-  slower when flattened. But 43 *decelerate* -- they currently slow down and hang
-  near you, and flattened they hold their launch speed for their whole flight,
-  which makes those harder, not easier.
-- **Curving patterns lose their shape.** A single accelerating shot is often what
-  draws the spiral or the sweep. Straightened, a quarter of the game's weapons
-  change pattern, and some read sparse.
-- **Shots are still aimed at you when fired.** Only the post-fire tracking stops.
-  Gating the spawn-time aim as well would turn authored patterns into fixed
-  lattices, which is a much bigger change than the name suggests.
-
-Bullets were never carried along by the background scroll or by your ship in the
-first place -- they already moved in absolute screen coordinates. This is only
-about the deliberate curving on top.
+were fired, the way a CAVE or Touhou shot does. (To be honest I can't tell the 
+differences).
 
 ## Bullet Hell mode
 Setup - Gameplay - Bullet Hell (ON/OFF), OFF by default. The setting is stored
