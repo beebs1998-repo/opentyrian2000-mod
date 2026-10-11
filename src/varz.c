@@ -202,6 +202,16 @@ JE_boolean debug = false; /*Debug Mode*/
 
 bool small_hitbox_enabled = false;
 bool bullet_hell_enabled = false;
+// Deliberately the one option here that defaults to true.  Stock Tyrian bends
+// enemy shots toward the ship and accelerates them as they fly, and an existing
+// opentyrian.cfg predating this flag has no key to override it -- defaulting to
+// false would silently change how every current install plays.  Turn the row off
+// for straight-line, modern-shooter bullets.
+//
+// Measured against the 819 base-bank weapons in tyrian.hdt: 6 use tx/ty (the
+// bending) and 218 use acceleration/accelerationx (the speeding up), so this
+// one flag covers both and is named for the union rather than either mechanism.
+bool bullet_curves_enabled = true;
 bool reverb_enabled = false;
 bool stereo_enabled = false;
 bool surround_enabled = false;

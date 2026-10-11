@@ -289,6 +289,11 @@ void applySmallHitbox(void);
 extern bool bullet_hell_enabled;
 void applyBulletHell(void);
 
+// When true, enemy shots keep bending toward the ship and keep accelerating as
+// they fly (stock Tyrian).  When false every shot travels its spawn velocity in
+// a dead-straight line.  Defaults to true; see the definition in varz.c.
+extern bool bullet_curves_enabled;
+
 // Score multiplier Bullet Hell contributes at the current difficulty.  1.0 when
 // the mode is off.
 float bullet_hell_score_multiplier(void);

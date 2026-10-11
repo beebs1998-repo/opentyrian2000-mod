@@ -217,6 +217,7 @@ bool load_opentyrian_config(void)
 	interp_smooth_motion = true;
 	small_hitbox_enabled = false;
 	bullet_hell_enabled = false;
+	bullet_curves_enabled = true;
 	reverb_enabled = false;
 	stereo_enabled = false;
 	surround_enabled = false;
@@ -260,6 +261,16 @@ bool load_opentyrian_config(void)
 	{
 		config_get_bool_option(section, "small_hitbox", &small_hitbox_enabled);
 		config_get_bool_option(section, "bullet_hell", &bullet_hell_enabled);
+		// Stock behaviour, so a config written before this option existed simply
+		// keeps the default.  The helper leaves the value untouched when the key
+		// is missing, which is what makes the default in load_opentyrian_config()
+		// the fallback.  Do not substitute config_get_or_set_bool_option(): it
+		// takes its `value` by value and never writes back to this flag.
+		//
+		// This key was `bullet_wobble` for one unreleased build.  No migration is
+		// needed because it never reached a released binary; a config carrying the
+		// old key simply falls back to the default.
+		config_get_bool_option(section, "bullet_curves", &bullet_curves_enabled);
 
 		// Bullet Hell requires the small hitbox, so it forces it on; see
 		// applyBulletHell().  Reconciled on load too, so a hand-edited file
@@ -357,6 +368,7 @@ bool save_opentyrian_config(void)
 
 	config_set_bool_option(section, "small_hitbox", small_hitbox_enabled, OFF_ON);
 	config_set_bool_option(section, "bullet_hell", bullet_hell_enabled, OFF_ON);
+	config_set_bool_option(section, "bullet_curves", bullet_curves_enabled, OFF_ON);
 
 	section = config_find_or_add_section(config, "audio", NULL);
 	if (section == NULL)

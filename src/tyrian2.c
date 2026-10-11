@@ -1822,42 +1822,87 @@ draw_player_shot_loop_end:
 		unsigned liveShots = 0;
 		unsigned drawnShots = 0;
 
+		/* Sampled once per tick rather than per shot: this is a menu setting, so
+		   every live shot in a tick necessarily sees the same value. */
+		const bool bulletCurves = bullet_curves_enabled;
+
 		for (int z = 0; z < ENEMY_SHOT_MAX; z++)
 		{
 			if (enemyShotAvail[z] == 0)
 			{
 				liveShots++;
-				enemyShot[z].sxm += enemyShot[z].sxc;
+
+				/* Bullet Curves gates the two authored mechanisms that make a shot
+				   stop travelling in a straight line, and nothing else.  Both
+				   velocity *inputs* are gated; the position integration is not,
+				   because inside a disabled block the shot would freeze in place
+				   rather than fly straight.
+
+				   sxc/syc is weapons[].acceleration/accelerationx.  Measured over
+				   the 819 base-bank weapons it is only ever -1, 0 or +1 per tick,
+				   which sounds small but dominates over a flight: a shot starting
+				   at sy=3 reaches well past 8 within a few ticks.  174 weapons
+				   use +1 and 43 use -1, so flattening it is not a straight
+				   difficulty reduction -- the decelerating ones currently slow down
+				   and hang near the player, and now hold their launch speed for
+				   their whole flight.
+
+				   tx/ty is the weapon's aim-acceleration rate, and is the only
+				   per-tick coupling in the game between a shot and the ship: each
+				   live shot re-reads player[0].x/.y here and steps its velocity one
+				   unit toward it.  Re-reading the target every tick rather than
+				   fixing it at spawn is what makes the curve keep bending after
+				   the shot has left the turret, and makes it zig-zag once it
+				   crosses the player's centre line.
+
+				   Deliberately NOT gated: the spawn-time aim override in
+				   JE_drawEnemy().  A shot still points at where the ship was when
+				   the turret fired and then commits to that vector, which is what
+				   CAVE does -- only the post-fire tracking goes away.  Gating the
+				   aim too would rewrite authored patterns into fixed lattices
+				   rather than merely making them trackable.
+
+				   Gating here rather than zeroing these fields at spawn keeps the
+				   Bullet Hell ring loop in JE_drawEnemy() free of an extra branch,
+				   and makes the option take effect on shots already in flight:
+				   Setup is reachable from the pause menu, and "born curving" would
+				   leave every live shot bending for the rest of its life. */
+				if (bulletCurves)
+					enemyShot[z].sxm += enemyShot[z].sxc;
 				enemyShot[z].sx += enemyShot[z].sxm;
 
-				if (enemyShot[z].tx != 0)
-				{
-					if (enemyShot[z].sx > player[0].x)
-					{
-						if (enemyShot[z].sxm > -enemyShot[z].tx)
-							enemyShot[z].sxm--;
-					}
-					else
-					{
-						if (enemyShot[z].sxm < enemyShot[z].tx)
-							enemyShot[z].sxm++;
-					}
-				}
-
-				enemyShot[z].sym += enemyShot[z].syc;
+				if (bulletCurves)
+					enemyShot[z].sym += enemyShot[z].syc;
 				enemyShot[z].sy += enemyShot[z].sym;
 
-				if (enemyShot[z].ty != 0)
+				if (bulletCurves)
 				{
-					if (enemyShot[z].sy > player[0].y)
+					if (enemyShot[z].tx != 0)
 					{
-						if (enemyShot[z].sym > -enemyShot[z].ty)
-							enemyShot[z].sym--;
+						if (enemyShot[z].sx > player[0].x)
+						{
+							if (enemyShot[z].sxm > -enemyShot[z].tx)
+								enemyShot[z].sxm--;
+						}
+						else
+						{
+							if (enemyShot[z].sxm < enemyShot[z].tx)
+								enemyShot[z].sxm++;
+						}
 					}
-					else
+
+					if (enemyShot[z].ty != 0)
 					{
-						if (enemyShot[z].sym < enemyShot[z].ty)
-							enemyShot[z].sym++;
+						if (enemyShot[z].sy > player[0].y)
+						{
+							if (enemyShot[z].sym > -enemyShot[z].ty)
+								enemyShot[z].sym--;
+						}
+						else
+						{
+							if (enemyShot[z].sym < enemyShot[z].ty)
+								enemyShot[z].sym++;
+						}
 					}
 				}
 
