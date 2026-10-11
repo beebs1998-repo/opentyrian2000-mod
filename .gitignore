@@ -43,3 +43,4 @@ tyrian.sav
 
 # Local working notes
 *.local.md
+/AGENTS.md
